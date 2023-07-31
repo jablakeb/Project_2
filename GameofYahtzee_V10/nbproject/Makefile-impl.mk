@@ -24,7 +24,7 @@ CLEAN_SUBPROJECTS=${CLEAN_SUBPROJECTS_${SUBPROJECTS}}
 
 
 # Project Name
-PROJECTNAME=GameofYahtzee_V6
+PROJECTNAME=GameofYahtzee_V10
 
 # Active Configuration
 DEFAULTCONF=Debug

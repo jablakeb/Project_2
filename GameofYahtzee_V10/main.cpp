@@ -23,8 +23,8 @@
  *          to score previously.
  * v0,5 - Build logic for displaying score card
  * v0.6 - Build in logic to save game and to load saved game
- * v1.0 - Start of Project 2 build - Move logic in switches to Functions and call
- *          from the switch statements
+ * v1.0 - Start of Project 2 build - replace individual variables to arrays
+ *          examples:(dice, keeper flags, markers, scores & score flags)
  */
 
 //System Libraries
@@ -40,31 +40,35 @@ using namespace std;
 //User Libraries
 
 //Global Constants
+const char ROUNDS = 8; //ROUNDS will be 8 for lite version. change to 13 once logic is built for full version 
+const char DICE = 5; //number of die
+
 
 //Function Prototypes
+void rollDie(short int[], bool[]);
 
 //Execution Begins Here
 int main(int argc, char** argv)
 {
     //Local constants
     const unsigned RSEED = time(0);  //use system time for seed
-    const char ROUNDS = 8; //ROUNDS will be 8 for lite version. change to 13 once logic is built for full version 
-
     //seed the random number generator
     srand(RSEED);
     
     //Declare Variables/Data Types
     
-    short int d1, d2, d3, d4, d5;  //die values
-    bool k1, k2 ,k3, k4, k5;  //kept die
-    char m1, m2, m3, m4, m5;  //die markers
+    short int die[DICE];
+    bool keep[DICE];
+    char mark[DICE];
     bool sf1, sf2, sf3, sf4, sf5, sf6, sf7, sf8; // scoring flags - if true that scoring option has been selected
-    short int s1, s2, s3, s4, s5, s6, s7, s8; //scoring variables 
+    bool scrflg[ROUNDS];
+    short int s1, s2, s3, s4, s5, s6, s7, s8; //scoring variables
+    short int score[ROUNDS];
     char mChoice;  //input the Main Menu choice
     char pChoice;  //input the Play Option choice
     short int choice; //cin input variable - will cast to mChoice
-    short int round;  // round x of 8
-    short int roll; // role x of 3
+    short int round;  // round counter x of 8
+    short int roll; // role counter x of 3
     string pName = "";
     
     //Initialize Variables
@@ -98,9 +102,12 @@ int main(int argc, char** argv)
                 cout << endl << endl;
                 
                 //reset games variables for new game
-                d1 = d2 = d3 = d4 = d5 = 0; // reset dice
-                k1 = k2 = k3 = k4 = k5 = false; //reset die keeper flags
-                m1 = m2 = m3 = m4 = m5 = ' '; // reset die markers
+                for (int i=0; i < DICE; i++)
+                    die[i]=0, keep[i]=false, mark[i]=' ';
+                
+                for (int i=0; i < DICE; i++)
+                    score[i]=0, scrflg[i] = false;
+                
                 s1 = s2 = s3 = s4 = s5 = s6 = s7 = s8 = 0; //reset individual scores
                 sf1 = sf2 = sf3 = sf4 = sf5 = sf6 = sf7 = sf8 = false;  //reset a;; scoring flags
                 round = 1;
@@ -125,40 +132,21 @@ int main(int argc, char** argv)
                     {
                         case '1': //Game Play - Roll the dice
                         {
-                                                     
-                            //roll only the die that have not been marked to keep
-                            //on first roll there are no kept die, but roll two and three will
-                            //each die will have it's own roll - could use for-loop here if
-                            // arrays could be used
-                            if (!k1)
-                                d1 = rand() % 6 + 1;
-                            if (!k2)
-                                d2 = rand() % 6 + 1;
-                            if (!k3)
-                                d3 = rand() % 6 + 1;
-                            if (!k4)
-                                d4 = rand() % 6 + 1;
-                            if (!k5)
-                                d5 = rand() % 6 + 1;
-                            
+                            rollDie(die, keep); //execute the roll die function
                             //Display the dice roll and any previously marked die that were kept
                             cout << endl << "Dice roll...";
                             cout << "\t\tDie #1\tDie #2\tDie #3\tDie #4\tDie #5" << endl;
                             cout << "\t\t\t------\t------\t------\t------\t------" << endl;
                             
-                            cout << "\t\t"
-                                 << "\t  " << (d1)
-                                 << "\t  " << (d2)
-                                 << "\t  " << (d3)
-                                 << "\t  " << (d4)
-                                 << "\t  " << (d5) << endl;
+                            cout << "\t\t";
+                            for (int i=0; i < DICE; i++)
+                                cout << "\t  " << die[i];
+                            cout << endl;
                             
-                            cout << "Marked to keep = X"
-                                 << "\t  " << (m1)
-                                 << "\t  " << (m2)
-                                 << "\t  " << (m3)
-                                 << "\t  " << (m4)
-                                 << "\t  " << (m5) << endl;
+                            cout << "Marked to keep = X";
+                                for (int i=0; i < DICE; i++)
+                                    cout << "\t  " << mark[i];
+                            cout << endl;
                                        
                             roll++; //increment the dice roll by 1
                                     //roll variable will be 1 ahead of actual roll
@@ -180,111 +168,42 @@ int main(int argc, char** argv)
                       
                                 while (ans != 'N' && ans != 'n') 
                                 {
-                                    if (!k1) //If not kept
+                                    for (int i=0; i < DICE; i++)
                                     {
-                                        char dAns;
-                                        cout << "Keep Die #1? (y/n) " << endl;
-                                        cin >> dAns;
-                                        if (dAns == 'Y' || dAns == 'y')
-                                            m1 = 'X', k1 = true;
-                                    }
-                                    else //else it's marked as kept, re-roll
-                                    {
-                                        char dAns;
-                                        cout << "Do you wish to re-roll Die #1? (y/n) " << endl;
-                                        cin >> dAns;
-                                        if (dAns == 'Y' || dAns == 'y')
-                                            m1 = ' ', k1 = false;
-                                    }
-
-                                    if (!k2) //same logic applied for k2-k5
-                                    {
-                                        char dAns;
-                                        cout << "Keep Die #2? (y/n) " << endl;
-                                        cin >> dAns;
-                                        if (dAns == 'Y' || dAns == 'y')
-                                            m2 = 'X', k2 = true;
-                                    }
-                                    else
-                                    {
-                                        char dAns;
-                                        cout << "Do you wish to re-roll Die #2? (y/n) " << endl;
-                                        cin >> dAns;
-                                        if (dAns == 'Y' || dAns == 'y')
-                                            m2 = ' ', k2 = false;
-                                    }
-
-                                    if (!k3)
-                                    {
-                                        char dAns;
-                                        cout << "Keep Die #3? (y/n) " << endl;
-                                        cin >> dAns;
-                                        if (dAns == 'Y' || dAns == 'y')
-                                            m3 = 'X', k3 = true;
-                                    }
-                                    else
-                                    {
-                                        char dAns;
-                                        cout << "Do you wish to re-roll Die #3? (y/n) " << endl;
-                                        cin >> dAns;
-                                        if (dAns == 'Y' || dAns == 'y')
-                                            m3 = ' ', k3 = false;
-                                    }                            
-
-                                    if (!k4)
-                                    {
-                                        char dAns;
-                                        cout << "Keep Die #4? (y/n) " << endl;
-                                        cin >> dAns;
-                                        if (dAns == 'Y' || dAns == 'y')
-                                            m4 = 'X', k4 = true;
-                                    }
-                                    else
-                                    {
-                                        char dAns;
-                                        cout << "Do you wish to re-roll Die #4? (y/n) " << endl;
-                                        cin >> dAns;
-                                        if (dAns == 'Y' || dAns == 'y')
-                                            m4 = ' ', k4 = false;
-                                    }
-
-                                    if (!k5)
-                                    {
-                                        char dAns;
-                                        cout << "Keep Die #5? (y/n) " << endl;
-                                        cin >> dAns;
-                                        if (dAns == 'Y' || dAns == 'y')
-                                            m5 = 'X', k5 = true;
-                                    }
-                                    else
-                                    {
-                                        char dAns;
-                                        cout << "Do you wish to re-roll Die #5? (y/n) " << endl;
-                                        cin >> dAns;
-                                        if (dAns == 'Y' || dAns == 'y')
-                                            m5 = ' ', k5 = false;
+                                        if (!keep[i]) //If not kept
+                                        {
+                                            char dAns;
+                                            cout << "Keep Die #" << i+1 << "? (y/n) " << endl;
+                                            cin >> dAns;
+                                            if (dAns == 'Y' || dAns == 'y')
+                                                mark[i] = 'X', keep[i] = true;
+                                        }
+                                        else //else it's marked as kept, re-roll
+                                        {
+                                            char dAns;
+                                            cout << "Do you wish to re-roll Die #" << i+1 << "? (y/n) " << endl;
+                                            cin >> dAns;
+                                            if (dAns == 'Y' || dAns == 'y')
+                                                mark[i] = ' ', keep[i] = false;
+                                        }
                                     }
 
                                     cout << endl << "Selected Die...";
                                     cout << "\t\tDie #1\tDie #2\tDie #3\tDie #4\tDie #5" << endl;
                                     cout << "\t\t\t------\t------\t------\t------\t------" << endl;
 
-                                    cout << "\t\t"
-                                         << "\t  " << (d1)
-                                         << "\t  " << (d2)
-                                         << "\t  " << (d3)
-                                         << "\t  " << (d4)
-                                         << "\t  " << (d5) << endl;
-
-                                     cout << "Marked to keep = X"
-                                          << "\t  " << (m1)
-                                          << "\t  " << (m2)
-                                          << "\t  " << (m3)
-                                          << "\t  " << (m4)
-                                          << "\t  " << (m5) << endl;
-
-                                     cout << endl << "Do you want to make any changes? (y/n) " << endl;
-                                     cin >> ans;
+                                    cout << "\t\t";
+                                    for (int i=0; i < DICE; i++)
+                                        cout << "\t  " << die[i];
+                                    cout << endl;
+                            
+                                    cout << "Marked to keep = X";
+                                        for (int i=0; i < DICE; i++)
+                                        cout << "\t  " << mark[i];
+                                    cout << endl;
+                                    
+                                    cout << endl << "Do you want to make any changes? (y/n) " << endl;
+                                    cin >> ans;
                                 }//end while
                             }//end if
                             
@@ -322,11 +241,11 @@ int main(int argc, char** argv)
                                             char ans;
                                             
                                             //add the score for all ones
-                                            s1 += d1 == 1 ? 1 : 0; //if die #1 is a one add one to score option #1
-                                            s1 += d2 == 1 ? 1 : 0; //if die #2 is a one add one to score option #1
-                                            s1 += d3 == 1 ? 1 : 0; //if die #3 is a one add one to score option #1
-                                            s1 += d4 == 1 ? 1 : 0; //if die #4 is a one add one to score option #1
-                                            s1 += d5 == 1 ? 1 : 0; //if die #5 is a one add one to score option #1
+                                            s1 += die[0] == 1 ? 1 : 0; //if die #1 is a one add one to score option #1
+                                            s1 += die[1] == 1 ? 1 : 0; //if die #2 is a one add one to score option #1
+                                            s1 += die[2] == 1 ? 1 : 0; //if die #3 is a one add one to score option #1
+                                            s1 += die[3] == 1 ? 1 : 0; //if die #4 is a one add one to score option #1
+                                            s1 += die[4] == 1 ? 1 : 0; //if die #5 is a one add one to score option #1
                                             
                                             cout << endl << "You will score " << s1 << " points for ones." << endl;
                                             cout << "Is that your final choice? (y/n) " << endl;
@@ -361,11 +280,11 @@ int main(int argc, char** argv)
                                             char ans;
                                             
                                             //add the score for all twos
-                                            s2 += d1 == 2 ? 2 : 0; //if die #1 is a two add two to score option #2
-                                            s2 += d2 == 2 ? 2 : 0; //if die #2 is a twp add two to score option #2
-                                            s2 += d3 == 2 ? 2 : 0; //if die #3 is a two add two to score option #2
-                                            s2 += d4 == 2 ? 2 : 0; //if die #4 is a two add two to score option #2
-                                            s2 += d5 == 2 ? 2 : 0; //if die #5 is a two add two to score option #2
+                                            s2 += die[0] == 2 ? 2 : 0; //if die #1 is a two add two to score option #2
+                                            s2 += die[1] == 2 ? 2 : 0; //if die #2 is a twp add two to score option #2
+                                            s2 += die[2] == 2 ? 2 : 0; //if die #3 is a two add two to score option #2
+                                            s2 += die[3] == 2 ? 2 : 0; //if die #4 is a two add two to score option #2
+                                            s2 += die[4] == 2 ? 2 : 0; //if die #5 is a two add two to score option #2
                                             
                                             cout << endl << "You will score " << s2 << " points for twos." << endl;
                                             cout << "Is that your final choice? (y/n) " << endl;
@@ -398,11 +317,11 @@ int main(int argc, char** argv)
                                             char ans;
                                             
                                             //add the score for all threes
-                                            s3 += d1 == 3 ? 3 : 0; //if die #1 is a three add three to score option #3
-                                            s3 += d2 == 3 ? 3 : 0; //if die #2 is a three add three to score option #3
-                                            s3 += d3 == 3 ? 3 : 0; //if die #3 is a three add three to score option #3
-                                            s3 += d4 == 3 ? 3 : 0; //if die #4 is a three add three to score option #3
-                                            s3 += d5 == 3 ? 3 : 0; //if die #5 is a three add three to score option #3
+                                            s3 += die[0] == 3 ? 3 : 0; //if die #1 is a three add three to score option #3
+                                            s3 += die[1] == 3 ? 3 : 0; //if die #2 is a three add three to score option #3
+                                            s3 += die[2] == 3 ? 3 : 0; //if die #3 is a three add three to score option #3
+                                            s3 += die[3] == 3 ? 3 : 0; //if die #4 is a three add three to score option #3
+                                            s3 += die[4] == 3 ? 3 : 0; //if die #5 is a three add three to score option #3
                                             
                                             cout << endl << "You will score " << s3 << " points for Threes." << endl;
                                             cout << "Is that your final choice? (y/n) " << endl;
@@ -435,11 +354,11 @@ int main(int argc, char** argv)
                                             char ans;
                                             
                                             //add the score for all fours
-                                            s4 += d1 == 4 ? 4 : 0; //if die #1 is a four add four to score option #4
-                                            s4 += d2 == 4 ? 4 : 0; //etc
-                                            s4 += d3 == 4 ? 4 : 0; //etc
-                                            s4 += d4 == 4 ? 4 : 0; //etc
-                                            s4 += d5 == 4 ? 4 : 0; //etc
+                                            s4 += die[0] == 4 ? 4 : 0; //if die #1 is a four add four to score option #4
+                                            s4 += die[1] == 4 ? 4 : 0; //etc
+                                            s4 += die[2] == 4 ? 4 : 0; //etc
+                                            s4 += die[3] == 4 ? 4 : 0; //etc
+                                            s4 += die[4] == 4 ? 4 : 0; //etc
                                             
                                             cout << endl << "You will score " << s4 << " points for Fours." << endl;
                                             cout << "Is that your final choice? (y/n) " << endl;
@@ -473,11 +392,11 @@ int main(int argc, char** argv)
                                             char ans;
                                             
                                             //add the score for all fives
-                                            s5 += d1 == 5 ? 5 : 0; //if die #1 is a five add five to score option #5
-                                            s5 += d2 == 5 ? 5 : 0; //etc
-                                            s5 += d3 == 5 ? 5 : 0; //etc
-                                            s5 += d4 == 5 ? 5 : 0; //etc
-                                            s5 += d5 == 5 ? 5 : 0; //etc
+                                            s5 += die[0] == 5 ? 5 : 0; //if die #1 is a five add five to score option #5
+                                            s5 += die[1] == 5 ? 5 : 0; //etc
+                                            s5 += die[2] == 5 ? 5 : 0; //etc
+                                            s5 += die[3] == 5 ? 5 : 0; //etc
+                                            s5 += die[4] == 5 ? 5 : 0; //etc
                                             
                                             cout << endl << "You will score " << s5 << " points for Fives." << endl;
                                             cout << "Is that your final choice? (y/n) " << endl;
@@ -511,11 +430,11 @@ int main(int argc, char** argv)
                                             char ans;
                                             
                                             //add the score for all sixes
-                                            s6 += d2 == 6 ? 6 : 0; //if die #1 is a six add six to score option #6
-                                            s6 += d2 == 6 ? 6 : 0; //etc
-                                            s6 += d3 == 6 ? 6 : 0; //etc
-                                            s6 += d4 == 6 ? 6 : 0; //etc
-                                            s6 += d5 == 6 ? 6 : 0; //etc
+                                            s6 += die[0] == 6 ? 6 : 0; //if die #1 is a six add six to score option #6
+                                            s6 += die[1] == 6 ? 6 : 0; //etc
+                                            s6 += die[2] == 6 ? 6 : 0; //etc
+                                            s6 += die[3] == 6 ? 6 : 0; //etc
+                                            s6 += die[4] == 6 ? 6 : 0; //etc
                                             
                                             cout << endl << "You will score " << s6 << " points for Sixes." << endl;
                                             cout << "Is that your final choice? (y/n) " << endl;
@@ -548,7 +467,7 @@ int main(int argc, char** argv)
                                         {
                                             char ans;
                                             string congrat = "";
-                                            if (d1 == d2 && d1 == d3 && d1 == d4 && d1 == d5) //it is a Yahtzee
+                                            if (die[0] == die[1] && die[0] == die[2] && die[0] == die[3] && die[0] == die[4]) //it is a Yahtzee
                                             {
                                                 s7 = 50; //score 50
                                                 congrat = "Congratulations on the Yahtzee!!";
@@ -587,7 +506,7 @@ int main(int argc, char** argv)
                                         {
                                             char ans;
                                             
-                                            s8 = d1 + d2 + d3 + d4 + d5; //add all die
+                                            s8 = die[0] + die[1] + die[2] + die[3] + die[4]; //add all die
                                                                                         
                                             cout << endl << "You will score "
                                                  << s8 << " points for the Chance" << endl;
@@ -627,9 +546,8 @@ int main(int argc, char** argv)
                             
                             //reset round variables
                             roll = 1;
-                            d1 = d2 = d3 = d4 = d5 = 0; // reset dice
-                            k1 = k2 = k3 = k4 = k5 = false; //reset die keeper flags
-                            m1 = m2 = m3 = m4 = m5 = ' '; // reset die markers
+                            for (int i=0; i < DICE; i++)
+                                die[i] = 0, keep[i] = false, mark[i] = ' '; // reset die markers
     
                             if (round <= ROUNDS) //if rounds > max rounds, flow through to score card
                                 break; //else break
@@ -687,12 +605,12 @@ int main(int argc, char** argv)
                                 oFile << sf1 << "\t" << sf2 << "\t" << sf3 << "\t"
                                       << sf4 << "\t" << sf5 << "\t" << sf6 << "\t"
                                       << sf7 << "\t" << sf8 << endl; //write score flags
-                                oFile << d1 << "\t" << d2 << "\t" << d3 << "\t"
-                                      << d4 << "\t" << d5 << endl; //write scores
-                                oFile << k1 << "\t" << k2 << "\t" << k3 << "\t"
-                                      << k4 << "\t" << k5 << endl; //write die keeps
-                                oFile << m1 << "\t" << m2 << "\t" << m3 << "\t"
-                                      << m4 << "\t" << m5 << endl; //write die markers
+                                oFile << die[0] << "\t" << die[1] << "\t" << die[2] << "\t"
+                                      << die[3] << "\t" << die[4] << endl; //write scores
+                                oFile << keep[0] << "\t" << keep[1] << "\t" << keep[2] << "\t"
+                                      << keep[3] << "\t" << keep[4] << endl; //write die keeps
+                                oFile << mark[0] << "\t" << mark[1] << "\t" << mark[2] << "\t"
+                                      << mark[3] << "\t" << mark[4] << endl; //write die markers
                                 oFile.close();
                             }
                             else
@@ -743,5 +661,18 @@ int main(int argc, char** argv)
     
     //Exit Routine
     return 0;
+}
+
+void rollDie(short int p1[], bool p2[])
+{
+    //roll only the die that have not been marked to keep
+    //on first roll there are no kept die, but roll two and three will
+    //each die will have it's own roll - could use for-loop here if
+    // arrays could be used
+    for (int i=0; i < DICE; i++)
+    {
+        if (!p2[i])
+            p1[i] = rand() % 6 + 1;
+    }
 }
 
