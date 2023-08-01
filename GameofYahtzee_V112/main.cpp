@@ -27,6 +27,7 @@
  *          examples:(dice, keeper flags, markers), move dice roll to a function
  * v1.1 - use arrays for the scoring system and move various logic into functions
  *          where appropriate
+ * v1.2 - Clean up code and apply any logic needed for credit
  */
 
 //System Libraries
@@ -36,7 +37,8 @@
 #include <cmath>
 #include <cstdlib>  //to get randmon number generstor
 #include <ctime>  // use system time for seed
-#include <fstream> //library to stream I/O files
+#include <fstream>//library to stream I/O files
+#include <vector>
 using namespace std;
 
 //User Libraries
@@ -46,7 +48,7 @@ using namespace std;
 
 //Function Prototypes
 void rollDie(short int[], bool[], char); //arguments: dice array, keeper array, array size
-bool scr1to6(short int[], bool[], short int[], char, char, string[]); //arguments: scoring array, score flag array, dice array, 
+bool scr1to6(short int[], bool[], short int[], char, char); //arguments: scoring array, score flag array, dice array, 
 
 //Execution Begins Here
 int main(int argc, char** argv)
@@ -72,7 +74,6 @@ int main(int argc, char** argv)
     short int round;  // round counter x of 8
     short int roll; // role counter x of 3
     string pName = "";
-    string dName[6] = {"Ones", "Twos", "Threes", "Fours", "Fives", "Sixes"};
     
     //Initialize Variables
     mChoice = '0';
@@ -125,7 +126,7 @@ int main(int argc, char** argv)
                          << "\t3. End Round and Select Scoring Choice" << endl //if you want to end round before third roll
                          << "\t4. View Score Card" << endl
                          << "\t5. Save Game and Exit to Main Menu" << endl
-                         << "\t8. Exit Program" << endl;
+                         << "\t8. Exit Program" << endl
                          << "\t9. Exit to Main Menu" << endl;
                     
                     cin >> pChoice;
@@ -243,7 +244,7 @@ int main(int argc, char** argv)
                                     case 5:
                                     case 6: // this function can be used for any score options 1-6
                                     {
-                                        scrFlg = scr1to6(score, sFlg, die, DICE, scrOpt, dName);
+                                        scrFlg = scr1to6(score, sFlg, die, DICE, scrOpt);
                                         break;
                                     }// end case 1
                                     
@@ -412,6 +413,9 @@ int main(int argc, char** argv)
                         }
                         
                         case '9': //Exit to Main Menu
+                        {
+                            break;
+                        }
                         
                         default:
                         {
@@ -467,21 +471,25 @@ void rollDie(short int p1[], bool p2[], char p3)
     }
 }
 
-bool scr1to6(short int p1[], bool p2[], short int p3[], char p4, char p5, string p6[])
+bool scr1to6(short int p1[], bool p2[], short int p3[], char p4, char p5)
 {
     //arguments: p1[]=scoring array; p2[]=score flag array; p3[]=dice array
-    //           p4=SIZE of dice array; p5=passed scoring option; p6[]=dice names array(Ones, Twos, etc)
+    //           p4=SIZE of dice array; p5=passed scoring option;
+
+    static vector<string> dName = {"Ones", "Twos", "Threes", "Fours", "Fives", "Sixes"};
+
     //scoring flag array is used to determine if that scoring option has already been used
     //if so, logic will flow to else statement, displaying a notification
     if (!p2[p5-1]) //if scoring flag is not on, score to this category...
     {
+
         char ans;
 
         //add the score for all...
         for (int i=0; i < p4; i++)
             p1[p5-1] += p3[i] == p5 ? p5 : 0;
 
-        cout << endl << "You will score " << p1[p5-1] << " points for " << p6[p5-1] << "." << endl;
+        cout << endl << "You will score " << p1[p5-1] << " points for " << dName[p5-1] << "." << endl;
         cout << "Is that your final choice? (y/n) " << endl;
         cin >> ans;
 
@@ -500,7 +508,7 @@ bool scr1to6(short int p1[], bool p2[], short int p3[], char p4, char p5, string
     {
         //if scoring option has already been used display notification and
         //break to redisplay the scoring option menu
-        cout << "Scoring option for " << p6[p5-1] << " has already been used." << endl;
+        cout << "Scoring option for " << dName[p5-1] << " has already been used." << endl;
         cout << "Please select another scoring option." << endl;
         return false;
     }
